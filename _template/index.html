@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text to Image and Question Answering</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <h1>Text to Image and Question Answering</h1>
+    <h2>Generate Image</h2>
+    <input type="text" id="text-input" placeholder="Enter a description">
+    <br>
+    <button onclick="generateImage()">Generate Image</button>
+    <br>
+    <div id="image-container"></div>
+
+    <h2>Answer Question</h2>
+    <input type="text" id="question-input" placeholder="Enter a question">
+    <br>
+    <button onclick="answerQuestion()">Answer Question</button>
+    <br>
+    <div id="answer-container"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function generateImage() {
+            var text = $("#text-input").val();
+            $.ajax({
+                type: "POST",
+                url: "/generate_image",
+                data: JSON.stringify({ "text": text }),
+                contentType: "application/json",
+                success: function(response) {
+                    if ("image_url" in response) {
+                        $("#image-container").html('<img src="' + response.image_url + '">');
+                    } else {
+                        $("#image-container").html('<p>Error: ' + response.error + '</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $("#image-container").html('<p>Error: ' + error + '</p>');
+                }
+            });
+        }
+
+        function answerQuestion() {
+            var question = $("#question-input").val();
+            $.ajax({
+                type: "POST",
+                url: "/answer_question",
+                data: JSON.stringify({ "question": question }),
+                contentType: "application/json",
+                success: function(response) {
+                    if ("answer_string" in response) {
+                        var answerText = response.answer_string;
+                        $("#answer-container").html('<p>' + answerText + '</p>');
+                    }else {
+                        $("#answer-container").html('<p>Error: Could not get the answers.</p>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $("#answer-container").html('<p>Error: ' + error + '</p>');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
